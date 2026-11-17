@@ -6,49 +6,79 @@ Client-side payment receipt generator and static PNG export workbench.
 
 ```text
 Recepit Generator/
-├── .github/workflows/pages.yml      # GitHub Pages build & deploy workflow
-├── .openai/hosting.json             # Static deployment config (serves dist/)
-├── docs/architecture.md             # Template specs, asset ownership & build flow
-├── package.json                     # Zero-dependency Node.js scripts (dev, build, check)
-├── public/
-│   └── assets/
-│       ├── fonts/                   # Shared receipt fonts (Arial, Arial-Bold, Roboto)
-│       └── templates/               # Independent asset folder per receipt design
-│           ├── purple-transfer/
-│           └── teal-bill/
-├── scripts/
-│   ├── build.mjs                    # Builds dist/ from src/ and public/assets/
-│   ├── check.mjs                    # Runs syntax, DOM/CSS/JS contract, and asset checks
-│   └── dev.mjs                      # Local HTTP static server for dist/
-└── src/
-    ├── index.html                   # Application shell
-    ├── styles/
-    │   ├── tokens.css               # Theme, scrollbar, typography, and motion tokens
-    │   └── main.css                 # Layout, scrollbars, and component styles
-    └── scripts/
-        ├── app.js                   # Form/draft state, asset preloading, canvas export
-        ├── canvas-utils.js          # Shared canvas text, wrapping, and logo helpers
-        └── templates/
-            ├── index.js             # Ordered template registry
-            ├── purple-transfer.js   # Template 1 definition & renderer
-            └── teal-bill.js         # Template 2 definition & renderer
+├── README.md
+├── docs/
+│   └── architecture.md        # Asset ownership, canvas specs, build & hosting flow
+└── receipt-studio/            # Deployable application root
+    ├── .openai/hosting.json   # Static deployment config (serves dist/)
+    ├── package.json           # Zero-dependency Node.js scripts (dev, build, check)
+    ├── public/
+    │   └── assets/            # Canonical source-of-truth fonts, templates, and logos (11 files)
+    ├── scripts/
+    │   ├── build.mjs          # Validates src/ + public/assets/ and builds dist/
+    │   ├── check.mjs          # Runs syntax, DOM/CSS/JS contract, and asset checks
+    │   └── dev.mjs            # Local HTTP static server for dist/
+    ├── src/
+    │   ├── index.html         # Application markup
+    │   ├── styles/
+    │   │   ├── tokens.css     # Theme, spacing, typography, and motion tokens
+    │   │   └── main.css       # Layout and component styles
+    │   └── scripts/
+    │       └── app.js         # Form state, asset preloading, canvas rendering, PNG export
+    └── dist/                  # Built static site served by .openai/hosting.json
+        ├── index.html
+        ├── style.css
+        ├── app.js
+        └── assets/
 ```
+
+## Prerequisites
+
+- **Node.js** `>= 18` (tested on Node `v24.22.3`)
+- Zero external npm dependencies (uses Node.js built-in modules only)
 
 ## Quick Start
 
+Run all commands from inside `receipt-studio/`:
+
 ```bash
+cd receipt-studio
+
+# 1. Build dist/ from src/ and public/assets/
 npm run build
+
+# 2. Verify JS syntax, DOM/CSS/JS contracts, and asset parity
 npm run check
+
+# 3. Start the local static server (default: http://localhost:4173)
 npm run dev
 ```
 
-## Adding a New Receipt Template
+You can override the dev server port with `PORT`:
 
-1. Create `public/assets/templates/<template-id>/` with `background.png` and its own independent default logo images.
-2. Add `src/scripts/templates/<template-id>.js` exporting the template config (`id`, `name`, `width`, `height`, `background`, `defaultLogos`, `logoSlots`, `defaults`, `extraFields`, `generateTransactionId()`, and `render()`).
-3. Register the template in `src/scripts/templates/index.js`.
-4. Run `npm run build && npm run check`.
+```bash
+PORT=8080 npm run dev
+```
 
-## GitHub Pages Deployment
+## Available Scripts (`receipt-studio/package.json`)
 
-`.github/workflows/pages.yml` automatically runs `npm run build && npm run check` on pushes to `main` and deploys `dist/` to GitHub Pages (enable **Settings → Pages → Source: GitHub Actions**).
+| Script | Command | Purpose |
+| :--- | :--- | :--- |
+| `dev` | `node scripts/dev.mjs` | Serves `dist/` over HTTP on `http://localhost:${PORT \|\| 4173}` with clean MIME types and `Cache-Control: no-store`. |
+| `build` | `node scripts/build.mjs` | Validates `src/` and `public/assets/`, copies `src/index.html` and `src/scripts/app.js`, concatenates `src/styles/tokens.css` + `src/styles/main.css` into `dist/style.css`, and mirrors `public/assets/` into `dist/assets/`. |
+| `check` | `node scripts/check.mjs` | Runs `node --check` on `scripts/*.mjs`, `src/scripts/app.js`, and `dist/app.js`; verifies `.openai/hosting.json`, required DOM IDs/attributes, CSS rules, JS hooks, and SHA-256 parity across all 11 assets in `public/assets/` and `dist/assets/`. |
+
+## Static Deployment
+
+`receipt-studio/.openai/hosting.json` configures static hosting directly from `receipt-studio/dist/`:
+
+```json
+{
+  "project_id": "appgprj_6acf1fe5999c8191b9363082aa147210",
+  "static": {
+    "directory": "dist"
+  }
+}
+```
+
+Always run `npm run build && npm run check` before deploying so `dist/` stays synchronized with `src/` and `public/assets/`.

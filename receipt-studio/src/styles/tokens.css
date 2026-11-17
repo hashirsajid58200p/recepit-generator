@@ -35,10 +35,6 @@
   --shadow-canvas: 0 12px 32px rgba(0, 0, 0, 0.45);
   --highlight-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  /* Scrollbars */
-  --scrollbar-thumb: #6e6e77;
-  --scrollbar-track: #141415;
-
   /* Radii & motion */
   --radius-sm: 6px;
   --radius-md: 10px;
@@ -74,8 +70,4 @@ html.light {
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-canvas: 0 8px 24px rgba(0, 0, 0, 0.08);
   --highlight-inset: none;
-
-  /* Scrollbars */
-  --scrollbar-thumb: #808088;
-  --scrollbar-track: #fafafa;
 }

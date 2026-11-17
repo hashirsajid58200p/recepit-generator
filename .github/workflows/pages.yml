@@ -27,6 +27,7 @@ jobs:
           node-version: '22'
 
       - name: Build and check
+        working-directory: receipt-studio
         run: |
           npm run build
           npm run check
@@ -37,7 +38,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: './receipt-studio/dist'
 
   deploy:
     environment:
