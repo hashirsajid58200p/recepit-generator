@@ -1,0 +1,12 @@
+{
+  "name": "receipt-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Client-side receipt generator and static export studio",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check.mjs"
+  }
+}
